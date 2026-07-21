@@ -29,6 +29,7 @@ Este repositorio contiene, de momento, la documentación de diseño siguiendo la
 | [`spec-carta-clara.md`](./spec-carta-clara.md) | Especificación funcional: historias de usuario priorizadas, requisitos, criterios de éxito y suposiciones |
 | [`plan-carta-clara.md`](./plan-carta-clara.md) | Plan técnico: arquitectura, decisiones de diseño y riesgos |
 | [`tasks-carta-clara.md`](./tasks-carta-clara.md) | Desglose de tareas de implementación, organizadas por historia de usuario |
+| [`backlog.md`](./backlog.md)| Mejoras para siguientes iteraciones|
 
 **Alcance de la demo:** las tres historias (P1 + P2 + P3) completas. El orden de construcción (Setup → Foundational → Historia 1 → Historia 2 → Historia 3) garantiza que siempre hay algo demostrable aunque el tiempo del reto se agote antes de terminar todo.
 
