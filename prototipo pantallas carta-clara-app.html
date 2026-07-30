@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carta Clara — Prototipo de interfaz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6EE;
+    --paper-line:#E4D9C4;
+    --ink:#2B2A26;
+    --ink-soft:#5B564C;
+    --teal:#1F5D58;
+    --teal-deep:#123B38;
+    --teal-tint:#E4EEEC;
+    --amber:#C98A2C;
+    --amber-tint:#F7E9D2;
+    --coral:#B54A3F;
+    --coral-tint:#F5E1DE;
+    --sage:#E6EADF;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:8px;
+    --shadow:0 8px 24px rgba(43,42,38,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:linear-gradient(180deg,#EFE9DC 0%, #E2DCCB 100%);
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 12px;
+  }
+  .stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+  .stage-label{
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+  /* ---- Phone frame ---- */
+  .phone{
+    width:390px;
+    max-width:92vw;
+    height:844px;
+    max-height:88vh;
+    background:var(--ink);
+    border-radius:46px;
+    padding:14px;
+    box-shadow:0 30px 60px rgba(18,25,23,0.35), 0 4px 12px rgba(0,0,0,0.2);
+    position:relative;
+  }
+  .phone::before{
+    content:"";
+    position:absolute;
+    top:14px; left:50%; transform:translateX(-50%);
+    width:120px; height:26px;
+    background:var(--ink);
+    border-radius:0 0 16px 16px;
+    z-index:5;
+  }
+  .screen-frame{
+    width:100%; height:100%;
+    background:var(--paper);
+    border-radius:32px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .statusbar{
+    height:44px;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 26px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .statusbar .icons{display:flex; gap:6px; align-items:center;}
+  .statusbar svg{display:block;}
+
+  .screen{
+    display:none;
+    flex-direction:column;
+    flex:1;
+    min-height:0;
+    animation:fadeIn 0.35s ease;
+  }
+  .screen.active{display:flex;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){
+    .screen{animation:none;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  .app-header{
+    flex:0 0 auto;
+    padding:6px 22px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .app-header h1{
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    font-weight:600;
+    margin:0;
+    color:var(--teal-deep);
+  }
+  .back-btn{
+    width:40px; height:40px;
+    border-radius:50%;
+    border:none;
+    background:var(--sage);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  .back-btn:focus-visible, button:focus-visible, .tap:focus-visible{
+    outline:3px solid var(--teal); outline-offset:2px;
+  }
+  .header-title{
+    font-family:'Fraunces', serif;
+    font-size:21px;
+    font-weight:600;
+    color:var(--ink);
+    margin:0;
+  }
+  .header-sub{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:2px 0 0;
+  }
+
+  .scroll{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:0 22px 100px;
+  }
+
+  /* ---- Buttons ---- */
+  .btn{
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    font-size:17px;
+    font-weight:700;
+    border-radius:999px;
+    padding:16px 20px;
+    border:none;
+    cursor:pointer;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:active{ transform:scale(0.98); }
+  .btn-primary{ background:var(--teal); color:#fff; }
+  .btn-primary:hover{ filter:brightness(1.06); }
+  .btn-secondary{ background:transparent; color:var(--teal-deep); border:2px solid var(--teal); }
+  .btn-ghost{ background:var(--sage); color:var(--ink); }
+  .btn-text{
+    background:none; border:none; color:var(--teal-deep);
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    font-size:15px; font-weight:700; text-decoration:underline;
+    cursor:pointer; padding:6px;
+  }
+  .btn-sm{ padding:10px 16px; font-size:15px; width:auto; }
+
+  /* ---- Cards ---- */
+  .card{
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius-lg);
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:var(--shadow);
+  }
+  .pill{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:13px; font-weight:700;
+    padding:5px 12px;
+    border-radius:999px;
+  }
+  .pill-amber{ background:var(--amber-tint); color:#8A5A16; }
+  .pill-teal{ background:var(--teal-tint); color:var(--teal-deep); }
+  .pill-coral{ background:var(--coral-tint); color:var(--coral); }
+  .pill-sage{ background:var(--sage); color:var(--ink-soft); }
+
+  /* ---- Home / list ---- */
+  .letter-card{
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius-lg);
+    padding:16px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    text-align:left;
+    width:100%;
+    font-family:inherit;
+  }
+  .letter-card .org{
+    font-size:12px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:4px;
+  }
+  .letter-card .subject{
+    font-family:'Fraunces', serif;
+    font-size:19px; font-weight:600;
+    margin:0 0 8px;
+    color:var(--ink);
+  }
+  .letter-card .meta-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state .icon-circle{
+    width:88px; height:88px; border-radius:50%;
+    background:var(--sage);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 18px;
+  }
+  .empty-state h2{
+    font-family:'Fraunces', serif;
+    font-size:20px; color:var(--ink); margin:0 0 8px;
+  }
+  .empty-state p{ font-size:15px; line-height:1.5; margin:0 auto; max-width:260px;}
+
+  .fab{
+    position:absolute;
+    right:22px; bottom:26px;
+    width:64px; height:64px;
+    border-radius:50%;
+    background:var(--teal);
+    color:#fff;
+    border:none;
+    box-shadow:0 10px 24px rgba(18,59,56,0.4);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    z-index:20;
+  }
+  .fab:active{ transform:scale(0.95); }
+  .fab-label{
+    position:absolute;
+    right:94px; bottom:44px;
+    background:var(--ink);
+    color:#fff;
+    font-size:13px;
+    padding:6px 10px;
+    border-radius:8px;
+    white-space:nowrap;
+    z-index:19;
+    opacity:0.92;
+  }
+
+  /* ---- Upload screen ---- */
+  .viewfinder{
+    margin:6px 0 18px;
+    background:var(--teal-deep);
+    border-radius:var(--radius-lg);
+    height:280px;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .viewfinder .guide{
+    width:78%; height:70%;
+    border:3px dashed rgba(255,255,255,0.55);
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .viewfinder .doc-illustration{ opacity:0.9; }
+  .tip-box{
+    background:var(--teal-tint);
+    border-radius:var(--radius-md);
+    padding:14px 16px;
+    display:flex; gap:10px;
+    align-items:flex-start;
+    margin-bottom:18px;
+    font-size:14.5px;
+    color:var(--teal-deep);
+    line-height:1.45;
+  }
+  .pages-row{
+    display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;
+  }
+  .page-thumb{
+    width:56px; height:72px;
+    border-radius:8px;
+    background:var(--sage);
+    border:1px solid var(--paper-line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:var(--ink-soft);
+  }
+  .page-add{
+    width:56px; height:72px;
+    border-radius:8px;
+    border:2px dashed var(--paper-line);
+    background:none;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+
+  /* ---- Processing screen (signature) ---- */
+  .processing-wrap{
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:0 30px;
+    text-align:center;
+  }
+  .translate-card{
+    background:#fff;
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:22px 20px;
+    width:100%;
+    min-height:150px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .translate-text{
+    font-size:16px;
+    line-height:1.6;
+    color:var(--ink-soft);
+  }
+  .translate-text .messy{
+    font-family:'Fraunces', serif;
+    letter-spacing:0.02em;
+    filter:blur(0.2px);
+    animation:garble 2.6s steps(1) infinite;
+  }
+  .translate-text .clear{
+    display:none;
+    color:var(--teal-deep);
+    font-weight:700;
+  }
+  .translate-card.done .messy{display:none;}
+  .translate-card.done .clear{display:inline;}
+  @keyframes garble{
+    0%{ opacity:1;}
+    45%{ opacity:0.55;}
+    100%{ opacity:1;}
+  }
+  .dots{ display:flex; gap:8px; margin-top:22px; }
+  .dots span{
+    width:9px; height:9px; border-radius:50%;
+    background:var(--teal);
+    opacity:0.3;
+    animation:bounce 1.2s infinite ease-in-out;
+  }
+  .dots span:nth-child(2){ animation-delay:0.2s; }
+  .dots span:nth-child(3){ animation-delay:0.4s; }
+  @keyframes bounce{ 0%,80%,100%{opacity:0.3; transform:translateY(0);} 40%{opacity:1; transform:translateY(-4px);} }
+  .processing-caption{ margin-top:20px; font-size:15px; color:var(--ink-soft); }
+
+  /* ---- Summary screen ---- */
+  .org-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .org-badge{
+    width:42px; height:42px; border-radius:12px;
+    background:var(--teal); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-weight:700; font-size:17px;
+    flex:0 0 auto;
+  }
+  .org-name{ font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); }
+  .summary-title{
+    font-family:'Fraunces', serif;
+    font-size:23px; font-weight:600;
+    margin:2px 0 14px;
+    color:var(--ink);
+  }
+  .summary-body{
+    font-size:17px; line-height:1.6;
+    margin-bottom:16px;
+  }
+  .deadline-card{
+    background:var(--amber-tint);
+    border:1.5px solid #E4C88C;
+    border-radius:var(--radius-lg);
+    padding:16px 18px;
+    margin-bottom:16px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .deadline-card .date{ font-family:'Fraunces', serif; font-size:20px; font-weight:700; color:#7A4E12; margin:0; }
+  .deadline-card .days{ font-size:14px; color:#8A5A16; margin:2px 0 0;}
+
+  details.trust{
+    background:var(--sage);
+    border-radius:var(--radius-md);
+    padding:12px 14px;
+    margin-bottom:16px;
+  }
+  details.trust summary{
+    cursor:pointer; font-weight:700; font-size:14.5px; color:var(--ink);
+    list-style:none;
+  }
+  details.trust summary::-webkit-details-marker{ display:none; }
+  details.trust summary::before{ content:"🔎  "; }
+  .quote{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--ink-soft);
+    border-left:3px solid var(--teal);
+    padding-left:12px;
+    margin:10px 0 0;
+  }
+  .disclaimer{
+    font-size:13px; color:var(--ink-soft); line-height:1.5;
+    margin-bottom:18px;
+  }
+  .util-row{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+  .icon-btn{
+    display:flex; align-items:center; gap:6px;
+    background:none; border:1.5px solid var(--paper-line);
+    border-radius:999px; padding:9px 14px;
+    font-size:14px; font-weight:700; color:var(--ink);
+    cursor:pointer;
+  }
+
+  .action-stack{ display:flex; flex-direction:column; gap:10px; margin-bottom:10px; }
+
+  /* ---- Draft screen ---- */
+  .letter-paper{
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius-md);
+    padding:20px;
+    font-family:'Fraunces', serif;
+    font-size:15.5px;
+    line-height:1.8;
+    color:var(--ink);
+    margin-bottom:16px;
+    min-height:320px;
+  }
+  .placeholder-chip{
+    background:var(--amber-tint);
+    color:#8A5A16;
+    padding:1px 6px;
+    border-radius:5px;
+    font-weight:700;
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    font-size:14px;
+    cursor:text;
+  }
+  .helper-note{
+    background:var(--teal-tint);
+    border-radius:var(--radius-md);
+    padding:12px 14px;
+    font-size:14px;
+    color:var(--teal-deep);
+    margin-bottom:18px;
+    line-height:1.5;
+  }
+
+  /* ---- Reminder timeline (saved detail) ---- */
+  .timeline{ margin:6px 0 18px; }
+  .tl-item{ display:flex; gap:12px; padding-bottom:18px; position:relative; }
+  .tl-item:last-child{ padding-bottom:0; }
+  .tl-item::before{
+    content:"";
+    position:absolute; left:9px; top:22px; bottom:0;
+    width:2px; background:var(--paper-line);
+  }
+  .tl-item:last-child::before{ display:none; }
+  .tl-dot{
+    width:20px; height:20px; border-radius:50%;
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:#fff; font-weight:700;
+    margin-top:2px;
+  }
+  .tl-dot.done{ background:var(--teal); }
+  .tl-dot.pending{ background:var(--paper-line); }
+  .tl-dot.next{ background:var(--amber); }
+  .tl-text .tl-label{ font-weight:700; font-size:15px; }
+  .tl-text .tl-date{ font-size:13px; color:var(--ink-soft); }
+
+  .toast{
+    position:absolute;
+    left:50%; bottom:100px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ink);
+    color:#fff;
+    padding:12px 20px;
+    border-radius:999px;
+    font-size:14.5px;
+    font-weight:700;
+    opacity:0;
+    pointer-events:none;
+    transition:all .3s ease;
+    z-index:50;
+    white-space:nowrap;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .section-label{
+    font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--ink-soft); margin:0 0 10px;
+  }
+
+  .nav-caption{
+    color:var(--ink-soft);
+    font-size:13px;
+    max-width:390px;
+    text-align:center;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="stage-label">Carta Clara · Prototipo interactivo</div>
+
+  <div class="phone">
+    <div class="screen-frame">
+
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="icons">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="6" width="3" height="5" rx="0.5" fill="currentColor"/><rect x="4.5" y="4" width="3" height="7" rx="0.5" fill="currentColor"/><rect x="9" y="2" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg>
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0.5" y="0.5" width="15" height="11" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="12" height="8" rx="1" fill="currentColor"/><rect x="16" y="4" width="1.5" height="4" rx="0.7" fill="currentColor"/></svg>
+        </span>
+      </div>
+
+      <!-- ============ SCREEN: HOME ============ -->
+      <section class="screen active" id="screen-home">
+        <div class="app-header">
+          <h1>Carta Clara</h1>
+        </div>
+        <p style="margin:-8px 22px 12px; font-size:14.5px; color:var(--ink-soft);">Tus cartas, explicadas.</p>
+        <div class="scroll" id="letters-list">
+          <div class="section-label">Tus cartas</div>
+
+          <button class="letter-card tap" onclick="openSaved('hacienda-justificante')">
+            <div class="org">Agencia Tributaria</div>
+            <p class="subject">Requerimiento de justificante de gastos</p>
+            <div class="meta-row">
+              <span class="pill pill-amber">⏳ Quedan 13 días</span>
+              <span class="pill pill-teal">Requiere acción</span>
+            </div>
+          </button>
+
+          <button class="letter-card tap" onclick="openSaved('ayuntamiento-multa')">
+            <div class="org">Ayuntamiento de Madrid</div>
+            <p class="subject">Alegación a multa de tráfico</p>
+            <div class="meta-row">
+              <span class="pill pill-coral">🔴 Quedan 2 días</span>
+              <span class="pill pill-teal">Requiere acción</span>
+            </div>
+          </button>
+
+          <button class="letter-card tap" onclick="openSaved('seg-social-pension')">
+            <div class="org">Seguridad Social</div>
+            <p class="subject">Justificante de vida laboral para la pensión</p>
+            <div class="meta-row">
+              <span class="pill pill-amber">⏳ Quedan 9 días</span>
+              <span class="pill pill-teal">Requiere acción</span>
+            </div>
+          </button>
+
+          <button class="letter-card tap" onclick="openSaved('banco-condiciones')">
+            <div class="org">Banco Santander</div>
+            <p class="subject">Cambio de condiciones de la cuenta</p>
+            <div class="meta-row">
+              <span class="pill pill-sage">ℹ️ Solo informativa</span>
+            </div>
+          </button>
+
+          <button class="letter-card tap" onclick="openSaved('hacienda-devolucion')">
+            <div class="org">Agencia Tributaria</div>
+            <p class="subject">Notificación de devolución de la renta</p>
+            <div class="meta-row">
+              <span class="pill pill-sage">✓ Resuelta</span>
+            </div>
+          </button>
+
+          <button class="letter-card tap" onclick="openSaved('seg-social-cita')">
+            <div class="org">Seguridad Social</div>
+            <p class="subject">Confirmación de cita previa</p>
+            <div class="meta-row">
+              <span class="pill pill-sage">✓ Resuelta</span>
+            </div>
+          </button>
+
+        </div>
+        <div class="fab-label" id="fab-label" style="display:none;">Subir carta</div>
+        <button class="fab" aria-label="Subir una carta nueva" onclick="goto('screen-upload')" onmouseenter="document.getElementById('fab-label').style.display='block'" onmouseleave="document.getElementById('fab-label').style.display='none'">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </button>
+      </section>
+
+      <!-- ============ SCREEN: UPLOAD ============ -->
+      <section class="screen" id="screen-upload">
+        <div class="app-header">
+          <button class="back-btn tap" aria-label="Volver" onclick="goto('screen-home')">←</button>
+          <div>
+            <p class="header-title">Sube tu carta</p>
+            <p class="header-sub">Haz una foto o elige una imagen</p>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="viewfinder">
+            <div class="guide">
+              <svg class="doc-illustration" width="70" height="90" viewBox="0 0 70 90" fill="none">
+                <rect x="2" y="2" width="66" height="86" rx="6" stroke="white" stroke-width="2.5"/>
+                <line x1="14" y1="22" x2="56" y2="22" stroke="white" stroke-width="2.5"/>
+                <line x1="14" y1="34" x2="56" y2="34" stroke="white" stroke-width="2.5"/>
+                <line x1="14" y1="46" x2="42" y2="46" stroke="white" stroke-width="2.5"/>
+                <rect x="14" y="60" width="24" height="12" rx="2" stroke="white" stroke-width="2.5"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="tip-box">
+            <span>💡</span>
+            <span>Coloca la carta sobre una superficie plana, con buena luz y sin sombras, para que se lea bien.</span>
+          </div>
+
+          <div class="section-label">Páginas añadidas</div>
+          <div class="pages-row">
+            <div class="page-thumb">1</div>
+            <button class="page-add tap" aria-label="Añadir otra página" onclick="showToast('Página añadida')">+</button>
+          </div>
+          <p style="font-size:13.5px; color:var(--ink-soft); margin-top:-10px; margin-bottom:18px;">¿Tu carta tiene varias páginas o un anexo? Añádelas todas antes de continuar.</p>
+
+          <div class="action-stack">
+            <button class="btn btn-primary tap" onclick="startProcessing()">📷 Hacer foto</button>
+            <button class="btn btn-secondary tap" onclick="startProcessing()">🖼️ Elegir de galería</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: PROCESSING ============ -->
+      <section class="screen" id="screen-processing">
+        <div class="processing-wrap">
+          <div class="translate-card" id="translate-card">
+            <p class="translate-text">
+              <span class="messy">"...en relación con el expediente ref. AT-2291/26, se requiere la aportación de la documentación acreditativa..."</span>
+              <span class="clear">"Hacienda te pide un justificante. Tienes hasta el 12 de agosto."</span>
+            </p>
+          </div>
+          <div class="dots"><span></span><span></span><span></span></div>
+          <p class="processing-caption">Traduciendo tu carta a lenguaje sencillo…</p>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: SUMMARY (new) ============ -->
+      <section class="screen" id="screen-summary">
+        <div class="app-header">
+          <button class="back-btn tap" aria-label="Volver" onclick="goto('screen-home')">←</button>
+          <p class="header-title">Resumen de la carta</p>
+        </div>
+        <div class="scroll">
+          <div class="org-row">
+            <div class="org-badge">AT</div>
+            <div>
+              <p class="org-name">Agencia Tributaria</p>
+            </div>
+          </div>
+          <h2 class="summary-title">Te piden un justificante</h2>
+          <p class="summary-body">Hacienda ha revisado tu expediente y necesita que envíes un documento que acredite un gasto que declaraste. No es una multa ni una sanción: solo piden justificar esa información antes de la fecha indicada.</p>
+
+          <div class="deadline-card">
+            <span style="font-size:26px;">📅</span>
+            <div>
+              <p class="date">12 de agosto de 2026</p>
+              <p class="days">Quedan 13 días para responder</p>
+            </div>
+          </div>
+
+          <span class="pill pill-teal" style="margin-bottom:16px; display:inline-flex;">✔️ Requiere una acción tuya</span>
+
+          <details class="trust">
+            <summary>Ver el fragmento original de la carta</summary>
+            <p class="quote">"...se requiere la aportación de la documentación acreditativa del gasto declarado en el ejercicio..."</p>
+          </details>
+
+          <p class="disclaimer">Esta explicación es una ayuda para entender tu carta y no sustituye asesoría legal o fiscal.</p>
+
+          <div class="util-row">
+            <button class="icon-btn tap" onclick="showToast('Reproduciendo resumen en voz alta')">🔊 Escuchar</button>
+            <button class="icon-btn tap" onclick="showToast('Compartido con tu familiar')">👥 Compartir</button>
+          </div>
+
+          <div class="action-stack">
+            <button class="btn btn-primary tap" onclick="goto('screen-draft')">Generar borrador de respuesta</button>
+            <button class="btn btn-ghost tap" onclick="saveAndReturn()">Guardar y avisarme del plazo</button>
+          </div>
+          <div style="text-align:center; margin-top:14px;">
+            <button class="btn-text tap" onclick="showToast('Gracias, lo revisaremos')">¿Esta explicación no es correcta?</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: DRAFT ============ -->
+      <section class="screen" id="screen-draft">
+        <div class="app-header">
+          <button class="back-btn tap" aria-label="Volver" onclick="goto('screen-summary')">←</button>
+          <p class="header-title">Borrador de respuesta</p>
+        </div>
+        <div class="scroll">
+          <div class="helper-note">Revisa el texto y completa tus datos antes de enviarlo. No guardamos esta información.</div>
+
+          <div class="letter-paper" contenteditable="true">
+            A la atención de la Agencia Tributaria<br><br>
+            Asunto: Aportación de documentación — expediente AT-2291/26<br><br>
+            Mi nombre es <span class="placeholder-chip">Tu nombre completo</span>, con DNI <span class="placeholder-chip">Tu DNI</span>, y en relación con el expediente arriba indicado, adjunto la documentación acreditativa del gasto declarado que se me solicita.<br><br>
+            Quedo a su disposición para cualquier aclaración adicional.<br><br>
+            Atentamente,<br>
+            <span class="placeholder-chip">Tu nombre completo</span>
+          </div>
+
+          <div class="action-stack">
+            <button class="btn btn-secondary tap" onclick="showToast('Texto copiado')">📋 Copiar texto</button>
+            <button class="btn btn-primary tap" onclick="saveAndReturn()">Guardar y marcar como enviada</button>
+          </div>
+          <p style="font-size:13px; color:var(--ink-soft); text-align:center; margin-top:14px;">Tú envías esta respuesta por tus propios medios (sede electrónica, correo o en persona).</p>
+        </div>
+      </section>
+
+      <!-- ============ SCREEN: SAVED DETAIL ============ -->
+      <section class="screen" id="screen-saved-detail">
+        <div class="app-header">
+          <button class="back-btn tap" aria-label="Volver" onclick="goto('screen-home')">←</button>
+          <p class="header-title">Detalle de la carta</p>
+        </div>
+        <div class="scroll" id="saved-detail-body">
+          <!-- filled by JS -->
+        </div>
+      </section>
+
+      <div class="toast" id="toast">Guardado</div>
+    </div>
+  </div>
+
+  <p class="nav-caption">Prototipo de navegación: los botones cambian de pantalla dentro del marco de móvil de arriba.</p>
+</div>
+
+<script>
+function goto(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startProcessing(){
+  goto('screen-processing');
+  const card = document.getElementById('translate-card');
+  card.classList.remove('done');
+  setTimeout(() => {
+    card.classList.add('done');
+    setTimeout(() => goto('screen-summary'), 900);
+  }, 1600);
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function saveAndReturn(){
+  showToast('Carta guardada');
+  setTimeout(() => goto('screen-home'), 700);
+}
+
+const savedLetters = {
+  'hacienda-justificante': {
+    org:'Agencia Tributaria', orgShort:'AT',
+    title:'Te piden un justificante de gastos',
+    body:'Hacienda ha revisado tu expediente y necesita que envíes un documento que acredite un gasto que declaraste. No es una multa ni una sanción: solo piden justificar esa información antes de la fecha indicada.',
+    date:'12 de agosto de 2026',
+    status:'pendiente',
+    urgency:'amber',
+    reminders:[
+      {label:'Aviso a 7 días', date:'5 de agosto', state:'done'},
+      {label:'Aviso a 5 días', date:'7 de agosto', state:'done'},
+      {label:'Aviso a 3 días', date:'9 de agosto', state:'next'},
+      {label:'Aviso a 2 días', date:'10 de agosto', state:'pending'},
+      {label:'Aviso a 1 día', date:'11 de agosto', state:'pending'},
+    ]
+  },
+  'ayuntamiento-multa': {
+    org:'Ayuntamiento de Madrid', orgShort:'AM',
+    title:'Puedes alegar contra esta multa',
+    body:'El Ayuntamiento te ha puesto una multa de tráfico por estacionar en zona regulada. Si no estás de acuerdo, puedes presentar una alegación explicando tu situación antes de que venza el plazo.',
+    date:'1 de agosto de 2026',
+    status:'pendiente',
+    urgency:'coral',
+    reminders:[
+      {label:'Aviso a 7 días', date:'25 de julio', state:'done'},
+      {label:'Aviso a 5 días', date:'27 de julio', state:'done'},
+      {label:'Aviso a 3 días', date:'29 de julio', state:'done'},
+      {label:'Aviso a 2 días', date:'30 de julio', state:'next'},
+      {label:'Aviso a 1 día', date:'31 de julio', state:'pending'},
+    ]
+  },
+  'seg-social-pension': {
+    org:'Seguridad Social', orgShort:'SS',
+    title:'Necesitan tu justificante de vida laboral',
+    body:'Para seguir tramitando tu solicitud de pensión, la Seguridad Social te pide que aportes tu informe de vida laboral actualizado. Puedes pedirlo gratis en su sede electrónica o por teléfono.',
+    date:'8 de agosto de 2026',
+    status:'pendiente',
+    urgency:'amber',
+    reminders:[
+      {label:'Aviso a 7 días', date:'1 de agosto', state:'next'},
+      {label:'Aviso a 5 días', date:'3 de agosto', state:'pending'},
+      {label:'Aviso a 3 días', date:'5 de agosto', state:'pending'},
+      {label:'Aviso a 2 días', date:'6 de agosto', state:'pending'},
+      {label:'Aviso a 1 día', date:'7 de agosto', state:'pending'},
+    ]
+  },
+  'banco-condiciones': {
+    org:'Banco Santander', orgShort:'BS',
+    title:'Solo te informan de un cambio',
+    body:'El banco te avisa de que a partir de septiembre cambian las condiciones de mantenimiento de tu cuenta. Es una carta informativa: no tienes que responder ni hacer nada, pero conviene que la leas.',
+    date:'—',
+    status:'informativa',
+    urgency:'sage',
+    reminders:[]
+  },
+  'hacienda-devolucion': {
+    org:'Agencia Tributaria', orgShort:'AT',
+    title:'Devolución de la renta ya tramitada',
+    body:'Hacienda confirma que tu devolución de la renta ya se ha ingresado en tu cuenta. No requería ninguna acción por tu parte y ya quedó marcada como resuelta.',
+    date:'—',
+    status:'resuelta',
+    urgency:'sage',
+    reminders:[]
+  },
+  'seg-social-cita': {
+    org:'Seguridad Social', orgShort:'SS',
+    title:'Confirmación de cita previa',
+    body:'Esta carta solo confirmaba tu cita ya tramitada. No requería ninguna acción y ya la marcaste como resuelta.',
+    date:'—',
+    status:'resuelta',
+    urgency:'sage',
+    reminders:[]
+  }
+};
+
+function openSaved(id){
+  const l = savedLetters[id];
+  const body = document.getElementById('saved-detail-body');
+
+  let statusPill;
+  if(l.status === 'resuelta'){
+    statusPill = '<span class="pill pill-sage">✓ Resuelta</span>';
+  } else if(l.status === 'informativa'){
+    statusPill = '<span class="pill pill-sage">ℹ️ Solo informativa, no requiere acción</span>';
+  } else if(l.urgency === 'coral'){
+    statusPill = '<span class="pill pill-coral">🔴 Requiere acción — plazo muy próximo</span>';
+  } else {
+    statusPill = '<span class="pill pill-teal">✔️ Requiere una acción tuya</span>';
+  }
+
+  let timelineHtml = '';
+  if(l.reminders.length){
+    timelineHtml = '<div class="section-label">Recordatorios</div><div class="timeline">' +
+      l.reminders.map(r => {
+        const dotClass = r.state === 'done' ? 'done' : (r.state === 'next' ? 'next' : 'pending');
+        const dotContent = r.state === 'done' ? '✓' : '';
+        return `<div class="tl-item">
+          <div class="tl-dot ${dotClass}">${dotContent}</div>
+          <div class="tl-text"><div class="tl-label">${r.label}</div><div class="tl-date">${r.date}</div></div>
+        </div>`;
+      }).join('') + '</div>';
+  }
+
+  let deadlineHtml = '';
+  if(l.date !== '—'){
+    const cardStyle = l.urgency === 'coral' ? ' style="background:var(--coral-tint); border-color:#E3B7AF;"' : '';
+    const dateStyle = l.urgency === 'coral' ? ' style="color:var(--coral);"' : '';
+    const daysStyle = l.urgency === 'coral' ? ' style="color:#8E3A30;"' : '';
+    deadlineHtml = `
+    <div class="deadline-card"${cardStyle}>
+      <span style="font-size:26px;">${l.urgency === 'coral' ? '⏰' : '📅'}</span>
+      <div><p class="date"${dateStyle}>${l.date}</p><p class="days"${daysStyle}>Fecha límite de esta carta</p></div>
+    </div>`;
+  }
+
+  let actionsHtml;
+  if(l.status === 'resuelta' || l.status === 'informativa'){
+    actionsHtml = `<button class="btn btn-secondary tap" onclick="showToast('Carta eliminada')">🗑️ Eliminar ahora</button>`;
+  } else {
+    actionsHtml = `<div class="action-stack">
+         <button class="btn btn-primary tap" onclick="showToast('Marcada como resuelta')">Marcar como resuelta</button>
+         <button class="btn-text tap" style="display:block; margin:12px auto 0;" onclick="showToast('Carta eliminada')">Eliminar ahora</button>
+       </div>`;
+  }
+
+  body.innerHTML = `
+    <div class="org-row">
+      <div class="org-badge">${l.orgShort}</div>
+      <p class="org-name">${l.org}</p>
+    </div>
+    <h2 class="summary-title">${l.title}</h2>
+    <p class="summary-body">${l.body}</p>
+    ${deadlineHtml}
+    ${statusPill}
+    <div style="margin-top:18px;"></div>
+    ${timelineHtml}
+    <p class="disclaimer" style="margin-top:16px;">Esta carta y su resumen se eliminarán automáticamente 30 días después de la consulta o de expirar el plazo, salvo que la borres antes.</p>
+    ${actionsHtml}
+  `;
+  goto('screen-saved-detail');
+}
+</script>
+
+</body>
+</html>
