@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Carta Clara",
+    "slug": "carta-clara",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FBF7EF",
+    "splash": {
+      "backgroundColor": "#FBF7EF"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Carta Clara necesita la cámara para fotografiar tus cartas y documentos.",
+        "NSPhotoLibraryUsageDescription": "Carta Clara necesita acceso a tus fotos para importar cartas ya fotografiadas."
+      }
+    },
+    "android": {
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "SCHEDULE_EXACT_ALARM"],
+      "package": "com.cartaclara.app"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2F6F6B"
+        }
+      ]
+    ]
+  }
+}
